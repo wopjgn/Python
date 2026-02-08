@@ -74,7 +74,7 @@ if "selected_person" not in st.session_state:
     st.session_state.selected_person = None
 
 # -------------------------
-# CSS：横並びレイアウト強制（一覧用）
+# 一覧用 CSS（これが無いと一覧が消える）
 # -------------------------
 st.markdown("""
 <style>
