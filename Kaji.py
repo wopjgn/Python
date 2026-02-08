@@ -107,12 +107,11 @@ html += "</div>"
 
 st.markdown(html, unsafe_allow_html=True)
 
-# 選択処理
+# 選択処理（rerun しない）
 params = st.query_params
 if "time" in params:
     st.session_state.selected_time = params["time"]
     st.query_params.clear()
-    st.rerun()
 
 # -------------------------
 # 担当者ボタン（フォーム方式）
@@ -134,12 +133,11 @@ html += "</div>"
 
 st.markdown(html, unsafe_allow_html=True)
 
-# 選択処理
+# 選択処理（rerun しない）
 params = st.query_params
 if "person" in params:
     st.session_state.selected_person = params["person"]
     st.query_params.clear()
-    st.rerun()
 
 # -------------------------
 # 家事の種類
@@ -168,16 +166,17 @@ if st.button("登録"):
 # -------------------------
 with st.expander("バージョン履歴"):
     st.write("""
-- v2.0 260208_角丸ボタン（青/緑）＋1クリック選択＋改行なし 完全安定版
-- v1.9 260208_1クリック選択・改行なし・完全安定版
-- v1.8 260208_1クリック選択方式に完全対応
-- v1.7 260208_URLパラメータ方式を廃止
-- v1.6 260208_時間ボタンの改行問題を修正
-- v1.5 260208_選択状態が色で分かるように改善
-- v1.4 260208_時間・名前をボタン選択式に変更
-- v1.3 260208_時間入力（ラジオボタン）を追加
-- v1.2 260208_削除機能を追加
-- v1.0 260207_初期リリース
+- v2.1 角丸ボタン（青/緑）＋選択反映バグ修正（rerun削除）
+- v2.0 角丸ボタン（青/緑）＋1クリック選択＋改行なし 完全安定版
+- v1.9 1クリック選択・改行なし・完全安定版
+- v1.8 1クリック選択方式に完全対応
+- v1.7 URLパラメータ方式を廃止
+- v1.6 時間ボタンの改行問題を修正
+- v1.5 選択状態が色で分かるように改善
+- v1.4 時間・名前をボタン選択式に変更
+- v1.3 時間入力（ラジオボタン）を追加
+- v1.2 削除機能を追加
+- v1.0 初期リリース
     """)
 
 # -------------------------
