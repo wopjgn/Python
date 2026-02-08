@@ -145,35 +145,64 @@ if st.button("登録"):
     conn.commit()
     st.success("登録しやした！")
 
-# -------------------------
-# 一覧表示
-# -------------------------
 st.subheader("実績一覧")
 
-df = pd.read_sql_query("SELECT * FROM kaji ORDER BY id DESC", conn)
-df["no"] = range(1, len(df) + 1)
+df = pd.read_sql_query("SELECT * FROM kaji", conn)
 
-# CSVダウンロード
-csv = df.to_csv(index=False).encode("utf-8")
-st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
+# HTMLテーブルを作成
+table_html = """
+<style>
+.table-container {
+    overflow-x: auto;
+    width: 100%;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* スマホでも横スクロール可能にする */
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+    white-space: nowrap; /* 折り返し防止 */
+}
+.delete-btn {
+    color: white;
+    background-color: red;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+</style>
 
-# -------------------------
-# 表示 & 削除（横並び）
-# -------------------------
+<div class="table-container">
+<table>
+    <tr>
+        <th>ID</th>
+        <th>日付</th>
+        <th>家事</th>
+        <th>担当</th>
+        <th>削除</th>
+    </tr>
+"""
+
 for _, row in df.iterrows():
-    st.markdown('<div class="record-row">', unsafe_allow_html=True)
+    table_html += f"""
+    <tr>
+        <td>{row['id']}</td>
+        <td>{row['date']}</td>
+        <td>{row['task']}</td>
+        <td>{row['person']}</td>
+        <td><button class="delete-btn" onclick="fetch('/?delete_id={row['id']}')">削除</button></td>
+    </tr>
+    """
 
-    col1, col2, col3, col4, col5, col6 = st.columns([1, 3, 3, 2, 2, 2])
+table_html += "</table></div>"
 
-    col1.markdown(f'<div class="col-no">{row["no"]}</div>', unsafe_allow_html=True)
-    col2.markdown(f'<div class="col-date">{row["date"]}</div>', unsafe_allow_html=True)
-    col3.markdown(f'<div class="col-task">{row["task"]}</div>', unsafe_allow_html=True)
-    col4.markdown(f'<div class="col-person">{row["person"]}</div>', unsafe_allow_html=True)
-    col5.markdown(f'<div class="col-time">{row["time"]}</div>', unsafe_allow_html=True)
+st.markdown(table_html, unsafe_allow_html=True)
 
-    if col6.button("削除", key=f"del_{row['id']}"):
-        cur.execute("DELETE FROM kaji WHERE id = ?", (row["id"],))
-        conn.commit()
-        st.rerun()
-
-    st.markdown('</div>', unsafe_allow_html=True)
+# 削除処理
+delete_id = st.query_params.get("delete_id")
+if delete_id:
+    delete_task(delete_id)
+    st.experimental_rerun()
