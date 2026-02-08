@@ -58,13 +58,9 @@ st.markdown("""
     color: black;
 }
 
-.time-btn.selected, .person-btn.selected {
-    background-color: #ffcc00;
+.selected {
+    background-color: #ffcc00 !important;
     font-weight: bold;
-}
-
-.time-btn:hover, .person-btn:hover {
-    background-color: #ddd;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -76,20 +72,14 @@ st.write("かかった時間")
 
 time_options = ["5分", "10分", "15分", "20分", "30分", "45分", "60分"]
 
-time_html = '<div class="button-row">'
-for t in time_options:
-    selected_class = "selected" if st.session_state.selected_time == t else ""
-    time_html += f'<a href="/?time={t}" class="time-btn {selected_class}">{t}</a>'
-time_html += "</div>"
+cols = st.columns(len(time_options))
 
-st.markdown(time_html, unsafe_allow_html=True)
+for i, t in enumerate(time_options):
+    is_selected = (st.session_state.selected_time == t)
+    button_label = f"✓ {t}" if is_selected else t
 
-# URLパラメータ処理（時間）
-params = st.query_params
-if "time" in params:
-    st.session_state.selected_time = params["time"]
-    st.query_params.clear()
-    st.rerun()
+    if cols[i].button(button_label, key=f"time_{t}"):
+        st.session_state.selected_time = t
 
 # -------------------------
 # 名前ボタン
@@ -97,21 +87,14 @@ if "time" in params:
 st.write("担当者")
 
 person_options = ["Piちゃん", "Miちゃん"]
+cols = st.columns(len(person_options))
 
-person_html = '<div class="button-row">'
-for p in person_options:
-    selected_class = "selected" if st.session_state.selected_person == p else ""
-    person_html += f'<a href="/?person={p}" class="person-btn {selected_class}">{p}</a>'
-person_html += "</div>"
+for i, p in enumerate(person_options):
+    is_selected = (st.session_state.selected_person == p)
+    button_label = f"✓ {p}" if is_selected else p
 
-st.markdown(person_html, unsafe_allow_html=True)
-
-# URLパラメータ処理（担当者）
-params = st.query_params
-if "person" in params:
-    st.session_state.selected_person = params["person"]
-    st.query_params.clear()
-    st.rerun()
+    if cols[i].button(button_label, key=f"person_{p}"):
+        st.session_state.selected_person = p
 
 # -------------------------
 # 家事の種類
@@ -140,6 +123,7 @@ if st.button("登録"):
 # -------------------------
 with st.expander("バージョン履歴"):
     st.write("""
+- v1.7 260208_URLパラメータ方式を廃止し、安定動作に改善
 - v1.6 260208_時間ボタンの改行問題を修正・選択色を改善
 - v1.5 260208_時間・名前ボタンの選択状態が色で分かるように改善
 - v1.4 260208_時間・名前をボタン選択式に変更
