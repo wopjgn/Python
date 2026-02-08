@@ -29,10 +29,10 @@ st.title("🏠家事 実績🐖")
 # セッション状態の初期化
 # -------------------------
 if "selected_time" not in st.session_state:
-    st.session_state.selected_time = None
+    st.session_state.selected_time = "未選択"
 
 if "selected_person" not in st.session_state:
-    st.session_state.selected_person = None
+    st.session_state.selected_person = "未選択"
 
 # -------------------------
 # CSS（ボタンデザイン）
@@ -47,7 +47,7 @@ st.markdown("""
     padding-bottom: 6px;
 }
 
-.time-btn, .person-btn {
+.sel-btn {
     padding: 10px 16px;
     border-radius: 20px;
     border: 1px solid #aaa;
@@ -58,7 +58,7 @@ st.markdown("""
     color: black;
 }
 
-.selected {
+.sel-btn.selected {
     background-color: #ffcc00 !important;
     font-weight: bold;
 }
@@ -66,35 +66,50 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------
-# 時間ボタン
+# 時間ボタン（1クリックで切り替わる）
 # -------------------------
 st.write("かかった時間")
 
 time_options = ["5分", "10分", "15分", "20分", "30分", "45分", "60分"]
 
-cols = st.columns(len(time_options))
+time_html = '<div class="button-row">'
+for t in time_options:
+    selected_class = "selected" if st.session_state.selected_time == t else ""
+    time_html += f"""
+        <button class="sel-btn {selected_class}" onclick="fetch('/time?val={t}')">{t}</button>
+    """
+time_html += "</div>"
 
-for i, t in enumerate(time_options):
-    is_selected = (st.session_state.selected_time == t)
-    button_label = f"✓ {t}" if is_selected else t
+st.markdown(time_html, unsafe_allow_html=True)
 
-    if cols[i].button(button_label, key=f"time_{t}"):
-        st.session_state.selected_time = t
+# 時間の更新
+if "val" in st.query_params and st.query_params.get("mode") == "time":
+    st.session_state.selected_time = st.query_params["val"]
+    st.query_params.clear()
+    st.rerun()
 
 # -------------------------
-# 名前ボタン
+# 名前ボタン（1クリックで切り替わる）
 # -------------------------
 st.write("担当者")
 
 person_options = ["Piちゃん", "Miちゃん"]
-cols = st.columns(len(person_options))
 
-for i, p in enumerate(person_options):
-    is_selected = (st.session_state.selected_person == p)
-    button_label = f"✓ {p}" if is_selected else p
+person_html = '<div class="button-row">'
+for p in person_options:
+    selected_class = "selected" if st.session_state.selected_person == p else ""
+    person_html += f"""
+        <button class="sel-btn {selected_class}" onclick="fetch('/person?val={p}')">{p}</button>
+    """
+person_html += "</div>"
 
-    if cols[i].button(button_label, key=f"person_{p}"):
-        st.session_state.selected_person = p
+st.markdown(person_html, unsafe_allow_html=True)
+
+# 名前の更新
+if "val" in st.query_params and st.query_params.get("mode") == "person":
+    st.session_state.selected_person = st.query_params["val"]
+    st.query_params.clear()
+    st.rerun()
 
 # -------------------------
 # 家事の種類
@@ -108,7 +123,7 @@ date = st.date_input("日付", datetime.now())
 # 登録処理
 # -------------------------
 if st.button("登録"):
-    if not st.session_state.selected_time or not st.session_state.selected_person:
+    if st.session_state.selected_time == "未選択" or st.session_state.selected_person == "未選択":
         st.error("時間と担当者を選択してください")
     else:
         cur.execute(
@@ -123,6 +138,7 @@ if st.button("登録"):
 # -------------------------
 with st.expander("バージョン履歴"):
     st.write("""
+- v1.8 260208_ボタン選択が1クリックで切り替わるように改善
 - v1.7 260208_URLパラメータ方式を廃止し、安定動作に改善
 - v1.6 260208_時間ボタンの改行問題を修正・選択色を改善
 - v1.5 260208_時間・名前ボタンの選択状態が色で分かるように改善
