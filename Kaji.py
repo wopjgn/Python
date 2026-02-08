@@ -83,49 +83,55 @@ st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
 # -------------------------
 st.markdown("""
 <style>
-.scroll-box {
-    overflow-x: auto;
-    white-space: nowrap;
-}
-.record-row {
+.row-box {
     display: flex;
+    flex-direction: row;
     border-bottom: 1px solid #ccc;
     padding: 6px 0;
+    min-width: 750px; /* スマホで横スクロール */
 }
-.record-cell {
+.cell {
     padding-right: 12px;
-    min-width: 80px;
+    white-space: nowrap;
+}
+.scroll-area {
+    overflow-x: auto;
 }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="scroll-box">', unsafe_allow_html=True)
+st.markdown('<div class="scroll-area">', unsafe_allow_html=True)
 
 # ヘッダー
 st.markdown("""
-<div class="record-row">
-    <div class="record-cell"><b>ID</b></div>
-    <div class="record-cell"><b>日付</b></div>
-    <div class="record-cell"><b>家事</b></div>
-    <div class="record-cell"><b>担当</b></div>
-    <div class="record-cell"><b>時間</b></div>
-    <div class="record-cell"><b>削除</b></div>
+<div class="row-box">
+    <div class="cell"><b>ID</b></div>
+    <div class="cell"><b>日付</b></div>
+    <div class="cell"><b>家事</b></div>
+    <div class="cell"><b>担当</b></div>
+    <div class="cell"><b>時間</b></div>
+    <div class="cell"><b>削除</b></div>
 </div>
 """, unsafe_allow_html=True)
 
 # 行ループ
 for _, row in df.iterrows():
-    cols = st.columns([1, 3, 3, 2, 2, 2])
+    # 1行の枠
+    st.markdown('<div class="row-box">', unsafe_allow_html=True)
 
-    cols[0].write(row["id"])
-    cols[1].write(row["date"])
-    cols[2].write(row["task"])
-    cols[3].write(row["person"])
-    cols[4].write(row["time"])
+    st.markdown(f"<div class='cell'>{row['id']}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='cell'>{row['date']}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='cell'>{row['task']}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='cell'>{row['person']}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='cell'>{row['time']}</div>", unsafe_allow_html=True)
 
-    if cols[5].button("削除", key=f"del_{row['id']}"):
+    # 削除ボタンだけ Streamlit
+    delete_col = st.columns(1)[0]
+    if delete_col.button("削除", key=f"del_{row['id']}"):
         cur.execute("DELETE FROM kaji WHERE id = ?", (row["id"],))
         conn.commit()
         st.rerun()
 
-st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown("</div>", unsafe_allow_html=True)
