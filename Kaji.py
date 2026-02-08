@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS kaji (
 """)
 conn.commit()
 
-st.title("家事実績入力アプリ")
+st.title("家事実績入力")
 
 # -------------------------
 # 入力フォーム
