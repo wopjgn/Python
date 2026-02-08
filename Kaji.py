@@ -66,6 +66,7 @@ if st.button("登録"):
     conn.commit()
     st.success("登録しやした！")
     st.rerun()
+base_url = st.request.url.split("?")[0]
 
 # -------------------------
 # 一覧表示
@@ -108,7 +109,9 @@ for _, row in df.iterrows():
         f"<td>{row['task']}</td>"
         f"<td>{row['person']}</td>"
         f"<td>{row['time']}</td>"
-        f"<td><a class='del-link' href='?delete_id={row['id']}'>削除</a></td>"
+        #f"<td><a class='del-link' href='?delete_id={row['id']}'>削除</a></td>"
+        f"<td><a class='del-link' href='{base_url}?delete_id={row['id']}'>削除</a></td>"
+
         f"</tr>"
     )
 
