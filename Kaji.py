@@ -23,8 +23,14 @@ conn.commit()
 params = st.query_params
 
 if "delete_id" in params:
+    raw = params["delete_id"]
+
+    # リストでも文字列でも対応
+    if isinstance(raw, list):
+        raw = raw[0]
+
     try:
-        delete_id = int(params["delete_id"][0])
+        delete_id = int(raw)
         cur.execute("DELETE FROM kaji WHERE id = ?", (delete_id,))
         conn.commit()
     except Exception as e:
@@ -33,6 +39,7 @@ if "delete_id" in params:
     # クエリパラメータをクリア
     st.query_params = {}
     st.rerun()
+
 
 # タイトル
 st.title("🏠家事 実績🐖")
