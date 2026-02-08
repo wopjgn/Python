@@ -48,16 +48,25 @@ def delete_task(task_id):
     cur.execute("DELETE FROM kaji WHERE id = ?", (task_id,))
     conn.commit()
 
+# URLパラメータで削除
+params = st.query_params
+if "delete" in params:
+    delete_task(params["delete"])
+    st.rerun()
+
 st.subheader("実績一覧")
 
 df = pd.read_sql_query("SELECT * FROM kaji", conn)
+
+# 表示用の連番を追加（1,2,3…）
+df["no"] = range(1, len(df) + 1)
 
 # -------------------------
 # CSS（横並びを強制）
 # -------------------------
 st.markdown("""
 <style>
-.row-wrap {
+.row {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -72,30 +81,31 @@ st.markdown("""
     flex-direction: row;
     gap: 16px;
 }
+.delete-btn {
+    background-color: red;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+}
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------
-# 行を描画（HTML + Streamlit ボタン）
+# 行を描画（HTMLのみ → 横並びが安定）
 # -------------------------
 for _, row in df.iterrows():
 
-    # 左側（ID, 日付, 家事, 担当）
-    left_html = f"""
-    <div class="row-wrap">
+    html = f"""
+    <div class="row">
         <div class="row-left">
-            <div>{row["id"]}</div>
+            <div>{row["no"]}</div>
             <div>{row["date"]}</div>
             <div>{row["task"]}</div>
             <div>{row["person"]}</div>
         </div>
+        <a class="delete-btn" href="/?delete={row['id']}">削除</a>
+    </div>
     """
 
-    st.markdown(left_html, unsafe_allow_html=True)
-
-    # 右側（削除ボタン）
-    if st.button("削除", key=f"del_{row['id']}"):
-        delete_task(row["id"])
-        st.rerun()
-
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown(html, unsafe_allow_html=True)
