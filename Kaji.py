@@ -148,45 +148,23 @@ df["no"] = range(1, len(df) + 1)
 
 csv = df.to_csv(index=False).encode("utf-8")
 st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
-
-st.markdown("""
-<style>
-.row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #ddd;
-    padding: 10px 0;
-    white-space: nowrap;
-    overflow-x: auto;
-}
-.row-left {
-    display: flex;
-    flex-direction: row;
-    gap: 16px;
-}
-.delete-btn {
-    background-color: red;
-    color: white;
-    padding: 4px 10px;
-    border-radius: 4px;
-    text-decoration: none;
-}
-</style>
-""", unsafe_allow_html=True)
-
+# -------------------------
+# 表示 & 削除（横並び）
+# -------------------------
 for _, row in df.iterrows():
-    html = f"""
-    <div class='row'>
-        <div class='row-left'>
-            <div>{row["no"]}</div>
-            <div>{row["date"]}</div>
-            <div>{row["task"]}</div>
-            <div>{row["person"]}</div>
-            <div>{row["time"]}</div>
-        </div>
-        <a class='delete-btn' href='/?delete={row["id"]}'>削除</a>
-    </div>
-    """
-    st.markdown(html, unsafe_allow_html=True)
+    st.markdown('<div class="record-row">', unsafe_allow_html=True)
+
+    col1, col2, col3, col4, col5, col6 = st.columns([1, 3, 3, 2, 2, 2])
+
+    col1.markdown(f'<div class="col-no">{row["no"]}</div>', unsafe_allow_html=True)
+    col2.markdown(f'<div class="col-date">{row["date"]}</div>', unsafe_allow_html=True)
+    col3.markdown(f'<div class="col-task">{row["task"]}</div>', unsafe_allow_html=True)
+    col4.markdown(f'<div class="col-person">{row["person"]}</div>', unsafe_allow_html=True)
+    col5.markdown(f'<div class="col-time">{row["time"]}</div>', unsafe_allow_html=True)
+
+    if col6.button("削除", key=f"del_{row['id']}"):
+        cur.execute("DELETE FROM kaji WHERE id = ?", (row["id"],))
+        conn.commit()
+        st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
