@@ -57,58 +57,45 @@ df = pd.read_sql_query("SELECT * FROM kaji", conn)
 # -------------------------
 st.markdown("""
 <style>
-.row {
+.row-wrap {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 16px;
-    padding: 10px 0;
+    justify-content: space-between;
     border-bottom: 1px solid #ddd;
+    padding: 10px 0;
     white-space: nowrap;
     overflow-x: auto;
 }
-.cell {
-    flex: 0 0 auto;
-}
-.delete-btn {
-    background-color: red;
-    color: white;
-    padding: 4px 10px;
-    border-radius: 4px;
-    text-decoration: none;
+.row-left {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------
-# 行を描画（1行＝1つのHTMLブロック）
+# 行を描画（HTML + Streamlit ボタン）
 # -------------------------
 for _, row in df.iterrows():
 
-    html = f"""
-    <div class="row">
-        <div class="cell">{row["id"]}</div>
-        <div class="cell">{row["date"]}</div>
-        <div class="cell">{row["task"]}</div>
-        <div class="cell">{row["person"]}</div>
-        <form action="" method="post">
-            <input type="hidden" name="delete_id" value="{row['id']}">
-            <button class="delete-btn">削除</button>
-        </form>
-    </div>
+    # 左側（ID, 日付, 家事, 担当）
+    left_html = f"""
+    <div class="row-wrap">
+        <div class="row-left">
+            <div>{row["id"]}</div>
+            <div>{row["date"]}</div>
+            <div>{row["task"]}</div>
+            <div>{row["person"]}</div>
+        </div>
     """
 
-    st.markdown(html, unsafe_allow_html=True)
+    st.markdown(left_html, unsafe_allow_html=True)
 
-# -------------------------
-# POSTで削除を受け取る
-# -------------------------
-if "delete_id" in st.session_state:
-    delete_task(st.session_state["delete_id"])
-    st.session_state.pop("delete_id")
-    st.rerun()
+    # 右側（削除ボタン）
+    if st.button("削除", key=f"del_{row['id']}"):
+        delete_task(row["id"])
+        st.rerun()
 
-# HTMLフォームのPOSTを拾う
-if st.query_params.get("delete_id"):
-    st.session_state["delete_id"] = st.query_params["delete_id"]
-    st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
