@@ -76,13 +76,11 @@ st.write("担当者")
 
 person_options = ["Piちゃん", "Miちゃん"]
 
-row = st.container()
-with row:
-    st.markdown('<div class="scroll-row">', unsafe_allow_html=True)
-    for p in person_options:
-        if st.button(p, key=f"person_{p}"):
-            st.session_state.selected_person = p
-    st.markdown('</div>', unsafe_allow_html=True)
+cols = st.columns(len(person_options))
+
+for col, p in zip(cols, person_options):
+    if col.button(p, key=f"person_{p}"):
+        st.session_state.selected_person = p
 
 if st.session_state.selected_person:
     st.success(f"選択中の担当者：{st.session_state.selected_person}")
