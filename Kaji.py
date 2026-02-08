@@ -69,9 +69,6 @@ if st.session_state.selected_time:
 # 担当者ボタン（横スクロール）
 # -------------------------
 
-# -------------------------
-# 担当者ボタン（横スクロール）
-# -------------------------
 st.write("担当者")
 
 person = st.radio(
@@ -82,7 +79,6 @@ person = st.radio(
 
 st.session_state.selected_person = person
 st.success(f"選択中の担当者：{person}")
-
 # -------------------------
 # 家事の種類
 # -------------------------
@@ -133,4 +129,4 @@ for _, row in df.iterrows():
     if cols[5].button("削除", key=f"del_{row['id']}"):
         cur.execute("DELETE FROM kaji WHERE id = ?", (row["id"],))
         conn.commit()
-        st.rerun()　
+        st.rerun()
