@@ -57,13 +57,17 @@ st.markdown("""
     font-size: 16px;
 }
 
-.btn.selected {
-    background-color: #ffcc00 !important;
+/* 時間：青 */
+.btn.time-selected {
+    background-color: #4da3ff !important;
+    color: white !important;
     font-weight: bold;
 }
 
+/* 担当者：緑 */
 .btn.person-selected {
-    background-color: #66ccff !important;
+    background-color: #4dcc88 !important;
+    color: white !important;
     font-weight: bold;
 }
 
@@ -74,7 +78,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------
-# 時間ボタン（フォーム方式：Cloudで確実に動く）
+# 時間ボタン（フォーム方式）
 # -------------------------
 st.write("かかった時間")
 
@@ -82,7 +86,7 @@ time_options = ["5分", "10分", "15分", "20分", "30分", "45分", "60分"]
 
 html = '<div class="button-row">'
 for t in time_options:
-    selected = "selected" if st.session_state.selected_time == t else ""
+    selected = "time-selected" if st.session_state.selected_time == t else ""
     html += f"""
         <form method="get">
             <input type="hidden" name="time" value="{t}">
@@ -154,7 +158,7 @@ if st.button("登録"):
 # -------------------------
 with st.expander("バージョン履歴"):
     st.write("""
-- v2.0 260208_角丸ボタン（A2）＋1クリック選択＋改行なし 完全安定版
+- v2.0 260208_角丸ボタン（青/緑）＋1クリック選択＋改行なし 完全安定版
 - v1.9 260208_1クリック選択・改行なし・完全安定版
 - v1.8 260208_1クリック選択方式に完全対応
 - v1.7 260208_URLパラメータ方式を廃止
