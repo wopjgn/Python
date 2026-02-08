@@ -42,18 +42,24 @@ with st.expander("バージョン履歴"):
     """)
 
 # -------------------------
-# 削除機能
+# 削除処理
 # -------------------------
 def delete_task(task_id):
     cur.execute("DELETE FROM kaji WHERE id = ?", (task_id,))
     conn.commit()
+
+# URL パラメータで削除
+params = st.query_params
+if "delete" in params:
+    delete_task(params["delete"])
+    st.experimental_rerun()
 
 st.subheader("実績一覧")
 
 df = pd.read_sql_query("SELECT * FROM kaji", conn)
 
 # -------------------------
-# CSS：行を横並びに強制
+# CSS（横並びを強制）
 # -------------------------
 st.markdown("""
 <style>
@@ -62,19 +68,26 @@ st.markdown("""
     flex-direction: row;
     align-items: center;
     gap: 16px;
-    padding: 8px 0;
+    padding: 10px 0;
     border-bottom: 1px solid #ddd;
-    overflow-x: auto;
     white-space: nowrap;
+    overflow-x: auto;
 }
 .cell {
     flex: 0 0 auto;
+}
+.delete-btn {
+    background-color: red;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-decoration: none;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------
-# 行を描画（絶対に横並び）
+# 行を描画（削除ボタンは HTML）
 # -------------------------
 for _, row in df.iterrows():
     st.markdown('<div class="row">', unsafe_allow_html=True)
@@ -84,9 +97,9 @@ for _, row in df.iterrows():
     st.markdown(f'<div class="cell">{row["task"]}</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="cell">{row["person"]}</div>', unsafe_allow_html=True)
 
-    # 削除ボタン（Streamlit純正）
-    if st.button("削除", key=f"del_{row['id']}"):
-        delete_task(row["id"])
-        st.experimental_rerun()
+    st.markdown(
+        f'<a class="delete-btn" href="/?delete={row["id"]}">削除</a>',
+        unsafe_allow_html=True
+    )
 
     st.markdown('</div>', unsafe_allow_html=True)
