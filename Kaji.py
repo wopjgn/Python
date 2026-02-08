@@ -4,7 +4,7 @@ import sqlite3
 from datetime import datetime
 
 # DB接続
-conn = sqlite3.connect("kaji.db")
+conn = sqlite3.connect("/mount/data/kaji.db")
 cur = conn.cursor()
 cur.execute("""
 CREATE TABLE IF NOT EXISTS kaji (
