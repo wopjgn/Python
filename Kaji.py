@@ -81,58 +81,31 @@ st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
 # -------------------------
 # スマホ対応テーブル（横スクロール & 改行禁止）
 # -------------------------
-table_html = """
-<style>
-.table-wrap {
-    overflow-x: auto;
-    width: 100%;
-}
 
-/* スマホで絶対に折り返さない */
-table {
-    border-collapse: collapse;
-    width: 100%;
-    min-width: 750px;  /* ← ここが重要！スマホ幅より広くする */
-}
-
-th, td {
-    border: 1px solid #ccc;
-    padding: 6px 10px;
-    white-space: nowrap; /* ← 改行禁止 */
-}
-
-/* 削除ボタン */
-.del-btn {
-    background-color: red;
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-}
+table_html = """<style>
+.table-wrap { overflow-x: auto; width: 100%; }
+table { border-collapse: collapse; width: 100%; min-width: 750px; }
+th, td { border: 1px solid #ccc; padding: 6px 10px; white-space: nowrap; }
+.del-btn { background-color: red; color: white; padding: 4px 8px; border-radius: 4px; border: none; }
 </style>
-
 <div class="table-wrap">
 <table>
 <tr>
-    <th>ID</th>
-    <th>日付</th>
-    <th>家事</th>
-    <th>担当</th>
-    <th>時間</th>
-    <th>削除</th>
+<th>ID</th><th>日付</th><th>家事</th><th>担当</th><th>時間</th><th>削除</th>
 </tr>
 """
 
 for _, row in df.iterrows():
-    table_html += f"""
-    <tr>
-        <td>{row['id']}</td>
-        <td>{row['date']}</td>
-        <td>{row['task']}</td>
-        <td>{row['person']}</td>
-        <td>{row['time']}</td>
-        <td><button class="del-btn" onclick="window.location.href='?delete_id={row['id']}'">削除</button></td>
-    </tr>
-    """
+    table_html += (
+        f"<tr>"
+        f"<td>{row['id']}</td>"
+        f"<td>{row['date']}</td>"
+        f"<td>{row['task']}</td>"
+        f"<td>{row['person']}</td>"
+        f"<td>{row['time']}</td>"
+        f"<td><button class='del-btn' onclick=\"window.location.href='?delete_id={row['id']}'\">削除</button></td>"
+        f"</tr>"
+    )
 
 table_html += "</table></div>"
 
