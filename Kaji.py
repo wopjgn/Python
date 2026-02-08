@@ -92,12 +92,12 @@ time_options = ["5分", "10分", "15分", "20分", "30分", "45分", "60分"]
 html = '<div class="button-row">'
 for t in time_options:
     selected = "time-selected" if st.session_state.selected_time == t else ""
-    html += f'''
+    html += '''
         <form method="get">
             <input type="hidden" name="time" value="{t}">
             <button class="btn {selected}" type="submit">{t}</button>
         </form>
-    '''
+    '''.format(t=t, selected=selected)
 html += "</div>"
 
 st.markdown(html, unsafe_allow_html=True)
@@ -117,12 +117,12 @@ person_options = ["Piちゃん", "Miちゃん"]
 html = '<div class="button-row">'
 for p in person_options:
     selected = "person-selected" if st.session_state.selected_person == p else ""
-    html += f'''
+    html += '''
         <form method="get">
             <input type="hidden" name="person" value="{p}">
             <button class="btn {selected}" type="submit">{p}</button>
         </form>
-    '''
+    '''.format(p=p, selected=selected)
 html += "</div>"
 
 st.markdown(html, unsafe_allow_html=True)
@@ -206,16 +206,23 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 for _, row in df.iterrows():
-    html = f'''
+    html = '''
     <div class="row">
         <div class="row-left">
-            <div>{row["no"]}</div>
-            <div>{row["date"]}</div>
-            <div>{row["task"]}</div>
-            <div>{row["person"]}</div>
-            <div>{row["time"]}</div>
+            <div>{no}</div>
+            <div>{date}</div>
+            <div>{task}</div>
+            <div>{person}</div>
+            <div>{time}</div>
         </div>
-        <a class="delete-btn" href="/?delete={row['id']}">削除</a>
+        <a class="delete-btn" href="/?delete={id}">削除</a>
     </div>
-    '''
+    '''.format(
+        no=row["no"],
+        date=row["date"],
+        task=row["task"],
+        person=row["person"],
+        time=row["time"],
+        id=row["id"]
+    )
     st.markdown(html, unsafe_allow_html=True)
