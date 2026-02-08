@@ -47,19 +47,20 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------
-# 時間ボタン（横スクロール）
 # -------------------------
-st.write("かかった時間")
+# 時間スライダー（任意設定）
+# -------------------------
+st.write("かかった時間（分）")
 
-time_options = ["5分", "10分", "15分", "20分", "30分", "45分", "60分"]
+time_value = st.slider(
+    "作業時間を選択",
+    min_value=1,
+    max_value=120,
+    value=15,
+    step=1
+)
 
-row = st.container()
-with row:
-    st.markdown('<div class="scroll-row">', unsafe_allow_html=True)
-    for t in time_options:
-        if st.button(t, key=f"time_{t}"):
-            st.session_state.selected_time = t
-    st.markdown('</div>', unsafe_allow_html=True)
+st.session_state.selected_time = f"{time_value}分"
 
 if st.session_state.selected_time:
     st.success(f"選択中の時間：{st.session_state.selected_time}")
