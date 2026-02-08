@@ -35,22 +35,52 @@ if "selected_person" not in st.session_state:
     st.session_state.selected_person = None
 
 # -------------------------
-# 時間ボタン（丸ボタン風）
+# CSS（ボタンデザイン）
+# -------------------------
+st.markdown("""
+<style>
+.time-btn, .person-btn {
+    padding: 10px 16px;
+    margin: 4px;
+    border-radius: 20px;
+    border: 1px solid #aaa;
+    background-color: #eee;
+    cursor: pointer;
+    display: inline-block;
+}
+.time-btn.selected, .person-btn.selected {
+    background-color: #ffcc00;
+    color: black;
+    font-weight: bold;
+}
+.time-btn:hover, .person-btn:hover {
+    background-color: #ddd;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# -------------------------
+# 時間ボタン
 # -------------------------
 st.write("かかった時間")
 
 time_options = ["5分", "10分", "15分", "20分", "30分", "45分", "60分"]
-cols = st.columns(len(time_options))
 
-for i, t in enumerate(time_options):
-    # 選択中は色を変える
-    if st.session_state.selected_time == t:
-        button_style = f"background-color:#ffcc00; color:black; padding:10px; border-radius:50%;"
-    else:
-        button_style = f"background-color:#eeeeee; color:black; padding:10px; border-radius:50%;"
+time_html = ""
+for t in time_options:
+    selected_class = "selected" if st.session_state.selected_time == t else ""
+    time_html += f"""
+        <a href="/?time={t}" class="time-btn {selected_class}">{t}</a>
+    """
 
-    if cols[i].button(t, key=f"time_{t}"):
-        st.session_state.selected_time = t
+st.markdown(time_html, unsafe_allow_html=True)
+
+# URLパラメータ処理（時間）
+params = st.query_params
+if "time" in params:
+    st.session_state.selected_time = params["time"]
+    st.query_params.clear()
+    st.rerun()
 
 # -------------------------
 # 名前ボタン
@@ -58,19 +88,25 @@ for i, t in enumerate(time_options):
 st.write("担当者")
 
 person_options = ["Piちゃん", "Miちゃん"]
-cols = st.columns(len(person_options))
 
-for i, p in enumerate(person_options):
-    if st.session_state.selected_person == p:
-        button_style = f"background-color:#66ccff; color:black; padding:10px; border-radius:10px;"
-    else:
-        button_style = f"background-color:#eeeeee; color:black; padding:10px; border-radius:10px;"
+person_html = ""
+for p in person_options:
+    selected_class = "selected" if st.session_state.selected_person == p else ""
+    person_html += f"""
+        <a href="/?person={p}" class="person-btn {selected_class}">{p}</a>
+    """
 
-    if cols[i].button(p, key=f"person_{p}"):
-        st.session_state.selected_person = p
+st.markdown(person_html, unsafe_allow_html=True)
+
+# URLパラメータ処理（担当者）
+params = st.query_params
+if "person" in params:
+    st.session_state.selected_person = params["person"]
+    st.query_params.clear()
+    st.rerun()
 
 # -------------------------
-# 家事の種類（プルダウン）
+# 家事の種類
 # -------------------------
 task = st.selectbox("家事の種類", ["🍳料理", "🫗皿洗い", "👕洗濯", "🧹掃除", "🛒買い物",
                                 "🚮ゴミ出し","🛁風呂掃除","🚽トイレ掃除","💧水回り"])
@@ -96,7 +132,9 @@ if st.button("登録"):
 # -------------------------
 with st.expander("バージョン履歴"):
     st.write("""
+- v1.5 260208_時間・名前ボタンの選択状態が色で分かるように改善
 - v1.4 260208_時間・名前をボタン選択式に変更
+- v1.3 260208_時間入力（ラジオボタン）を追加
 - v1.2 260208_削除機能を追加
 - v1.2 260207_絵文字で分かりやすく表示
 - v1.0 260207_初期リリース
@@ -110,7 +148,6 @@ def delete_task(task_id):
     conn.commit()
 
 params = st.query_params
-
 if "delete" in params:
     delete_task(params["delete"])
     st.query_params.clear()
@@ -119,12 +156,10 @@ if "delete" in params:
 st.subheader("実績一覧")
 
 df = pd.read_sql_query("SELECT * FROM kaji", conn)
-
-# 表示用の連番
 df["no"] = range(1, len(df) + 1)
 
 # -------------------------
-# CSVダウンロードボタン
+# CSVダウンロード
 # -------------------------
 csv = df.to_csv(index=False).encode("utf-8")
 st.download_button(
@@ -135,7 +170,7 @@ st.download_button(
 )
 
 # -------------------------
-# CSS（横並び）
+# CSS（一覧表示）
 # -------------------------
 st.markdown("""
 <style>
