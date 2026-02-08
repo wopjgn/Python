@@ -24,11 +24,11 @@ params = st.query_params
 
 if "delete_id" in params:
     try:
-        delete_id = int(params["delete_id"][0])  # ← ここが重要！
+        delete_id = int(params["delete_id"])
         cur.execute("DELETE FROM kaji WHERE id = ?", (delete_id,))
         conn.commit()
-    except Exception as e:
-        st.write("削除エラー:", e)
+    except:
+        pass
 
     # クエリパラメータをクリア
     st.query_params = {}
