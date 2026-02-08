@@ -4,14 +4,9 @@ import sqlite3
 from datetime import datetime
 
 # DB接続
-@st.cache_resource
-def get_connection():
-    import os
-    DB_PATH = os.path.join(os.getcwd(), "kaji.db")
-    return sqlite3.connect(DB_PATH)
-
-conn = get_connection()
-
+import os
+DB_PATH = os.path.join(os.getcwd(), "kaji.db")
+conn = sqlite3.connect(DB_PATH)
 
 cur = conn.cursor()
 cur.execute("""
