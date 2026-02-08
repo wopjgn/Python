@@ -39,6 +39,14 @@ if "selected_person" not in st.session_state:
 # -------------------------
 st.markdown("""
 <style>
+.button-row {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
 .sel-btn {
     padding: 10px 16px;
     border-radius: 20px;
@@ -47,15 +55,21 @@ st.markdown("""
     cursor: pointer;
     white-space: nowrap;
 }
+
 .sel-btn.selected {
     background-color: #ffcc00 !important;
+    font-weight: bold;
+}
+
+.sel-btn.person-selected {
+    background-color: #66ccff !important;
     font-weight: bold;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------
-# 時間ボタン（1クリックで切り替わる）
+# 時間ボタン（1クリックで即選択）
 # -------------------------
 st.write("かかった時間")
 
@@ -67,12 +81,11 @@ for i, t in enumerate(time_options):
     selected = (st.session_state.selected_time == t)
     label = f"✓ {t}" if selected else t
 
-    # ボタンを押したら即切り替え
     if cols[i].button(label, key=f"time_{t}"):
         st.session_state.selected_time = t
 
 # -------------------------
-# 名前ボタン（1クリックで切り替わる）
+# 担当者ボタン（1クリックで即選択）
 # -------------------------
 st.write("担当者")
 
@@ -113,8 +126,7 @@ if st.button("登録"):
 # -------------------------
 with st.expander("バージョン履歴"):
     st.write("""
-- v1.9 260208_JSを使わず安定動作する選択ボタンに変更
-- v1.8 260208_ボタン選択が1クリックで切り替わるように改善
+- v1.8 260208_1クリック選択方式に完全対応（改行なし・色変化）
 - v1.7 260208_URLパラメータ方式を廃止し、安定動作に改善
 - v1.6 260208_時間ボタンの改行問題を修正・選択色を改善
 - v1.5 260208_時間・名前ボタンの選択状態が色で分かるように改善
