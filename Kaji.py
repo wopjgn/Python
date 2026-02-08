@@ -39,20 +39,30 @@ if "selected_person" not in st.session_state:
 # -------------------------
 st.markdown("""
 <style>
+.button-row {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
 .time-btn, .person-btn {
     padding: 10px 16px;
-    margin: 4px;
     border-radius: 20px;
     border: 1px solid #aaa;
     background-color: #eee;
     cursor: pointer;
-    display: inline-block;
+    white-space: nowrap;
+    text-decoration: none;
+    color: black;
 }
+
 .time-btn.selected, .person-btn.selected {
     background-color: #ffcc00;
-    color: black;
     font-weight: bold;
 }
+
 .time-btn:hover, .person-btn:hover {
     background-color: #ddd;
 }
@@ -66,12 +76,11 @@ st.write("かかった時間")
 
 time_options = ["5分", "10分", "15分", "20分", "30分", "45分", "60分"]
 
-time_html = ""
+time_html = '<div class="button-row">'
 for t in time_options:
     selected_class = "selected" if st.session_state.selected_time == t else ""
-    time_html += f"""
-        <a href="/?time={t}" class="time-btn {selected_class}">{t}</a>
-    """
+    time_html += f'<a href="/?time={t}" class="time-btn {selected_class}">{t}</a>'
+time_html += "</div>"
 
 st.markdown(time_html, unsafe_allow_html=True)
 
@@ -89,12 +98,11 @@ st.write("担当者")
 
 person_options = ["Piちゃん", "Miちゃん"]
 
-person_html = ""
+person_html = '<div class="button-row">'
 for p in person_options:
     selected_class = "selected" if st.session_state.selected_person == p else ""
-    person_html += f"""
-        <a href="/?person={p}" class="person-btn {selected_class}">{p}</a>
-    """
+    person_html += f'<a href="/?person={p}" class="person-btn {selected_class}">{p}</a>'
+person_html += "</div>"
 
 st.markdown(person_html, unsafe_allow_html=True)
 
@@ -132,6 +140,7 @@ if st.button("登録"):
 # -------------------------
 with st.expander("バージョン履歴"):
     st.write("""
+- v1.6 260208_時間ボタンの改行問題を修正・選択色を改善
 - v1.5 260208_時間・名前ボタンの選択状態が色で分かるように改善
 - v1.4 260208_時間・名前をボタン選択式に変更
 - v1.3 260208_時間入力（ラジオボタン）を追加
