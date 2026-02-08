@@ -133,4 +133,4 @@ for _, row in df.iterrows():
     if cols[5].button("削除", key=f"del_{row['id']}"):
         cur.execute("DELETE FROM kaji WHERE id = ?", (row["id"],))
         conn.commit()
-        st.rerun()
+        st.rerun()　
