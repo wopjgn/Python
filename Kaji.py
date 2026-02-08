@@ -47,32 +47,42 @@ st.markdown("""
     padding-bottom: 8px;
 }
 
+/* form が横に伸びる問題を解決 */
+.button-row form {
+    display: inline-block !important;
+    margin: 0;
+    padding: 0;
+}
+
+/* 角丸ボタン */
 .btn {
-    padding: 10px 18px;
-    border-radius: 12px;
-    border: 1px solid #aaa;
-    background-color: #f2f2f2;
-    cursor: pointer;
-    white-space: nowrap;
-    font-size: 16px;
+    padding: 10px 18px !important;
+    border-radius: 12px !important;
+    border: 1px solid #aaa !important;
+    background-color: #f2f2f2 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    font-size: 16px !important;
+    color: black !important;
 }
 
 /* 時間：青 */
 .btn.time-selected {
     background-color: #4da3ff !important;
     color: white !important;
-    font-weight: bold;
+    font-weight: bold !important;
 }
 
 /* 担当者：緑 */
 .btn.person-selected {
     background-color: #4dcc88 !important;
     color: white !important;
-    font-weight: bold;
+    font-weight: bold !important;
 }
 
+/* hover */
 .btn:hover {
-    background-color: #e0e0e0;
+    background-color: #e0e0e0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
