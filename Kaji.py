@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS kaji (
 conn.commit()
 
 # タイトル
-st.title("🏠家事 実績🐖")
+st.title("🏠家事 実績🐖←み")
 
 # -------------------------
 # バージョン履歴（右上固定）
