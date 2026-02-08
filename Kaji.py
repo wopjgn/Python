@@ -79,17 +79,56 @@ csv = df.to_csv(index=False).encode("utf-8")
 st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
 
 # -------------------------
-# 表示 & 削除（横並び）
+# スマホ対応テーブル（横スクロール）
 # -------------------------
+table_html = """
+<style>
+.table-wrap {
+    overflow-x: auto;
+    width: 100%;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 650px; /* スマホで横スクロール */
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+    white-space: nowrap; /* 改行させない */
+}
+.del-btn {
+    background-color: red;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+</style>
+
+<div class="table-wrap">
+<table>
+<tr>
+    <th>ID</th>
+    <th>日付</th>
+    <th>家事</th>
+    <th>担当</th>
+    <th>時間</th>
+    <th>削除</th>
+</tr>
+"""
+
 for _, row in df.iterrows():
-    col1, col2, col3, col4, col5 = st.columns([1, 3, 3, 2, 2])
+    table_html += f"""
+    <tr>
+        <td>{row['id']}</td>
+        <td>{row['date']}</td>
+        <td>{row['task']}</td>
+        <td>{row['person']}</td>
+        <td>{row['time']}</td>
+        <td><button class="del-btn" onclick="window.location.href='?delete_id={row['id']}'">削除</button></td>
+    </tr>
+    """
 
-    col1.write(row["id"])
-    col2.write(row["date"])
-    col3.write(row["task"])
-    col4.write(row["person"])
+table_html += "</table></div>"
 
-    if col5.button("削除", key=f"del_{row['id']}"):
-        cur.execute("DELETE FROM kaji WHERE id = ?", (row["id"],))
-        conn.commit()
-        st.rerun()
+st.markdown(table_html, unsafe_allow_html=True)
