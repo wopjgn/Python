@@ -29,34 +29,56 @@ if "selected_person" not in st.session_state:
     st.session_state.selected_person = None
 
 # -------------------------
-# 時間ボタン
+# CSS：横スクロール行
+# -------------------------
+st.markdown("""
+<style>
+.scroll-row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+.scroll-row > div {
+    flex: 0 0 auto;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# -------------------------
+# 時間ボタン（横スクロール）
 # -------------------------
 st.write("かかった時間")
 
 time_options = ["5分", "10分", "15分", "20分", "30分", "45分", "60分"]
 
-cols = st.columns(len(time_options))
-for i, t in enumerate(time_options):
-    if cols[i].button(t):
-        st.session_state.selected_time = t
+row = st.container()
+with row:
+    st.markdown('<div class="scroll-row">', unsafe_allow_html=True)
+    for t in time_options:
+        if st.button(t, key=f"time_{t}"):
+            st.session_state.selected_time = t
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# 選択中の時間表示
 if st.session_state.selected_time:
     st.success(f"選択中の時間：{st.session_state.selected_time}")
 
 # -------------------------
-# 担当者ボタン
+# 担当者ボタン（横スクロール）
 # -------------------------
 st.write("担当者")
 
 person_options = ["Piちゃん", "Miちゃん"]
 
-cols = st.columns(len(person_options))
-for i, p in enumerate(person_options):
-    if cols[i].button(p):
-        st.session_state.selected_person = p
+row = st.container()
+with row:
+    st.markdown('<div class="scroll-row">', unsafe_allow_html=True)
+    for p in person_options:
+        if st.button(p, key=f"person_{p}"):
+            st.session_state.selected_person = p
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# 選択中の担当者表示
 if st.session_state.selected_person:
     st.success(f"選択中の担当者：{st.session_state.selected_person}")
 
