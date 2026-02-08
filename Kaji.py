@@ -11,31 +11,93 @@ CREATE TABLE IF NOT EXISTS kaji (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     date TEXT,
     task TEXT,
-    person TEXT
+    person TEXT,
+    time TEXT
 )
 """)
 conn.commit()
 
+# time列がなければ追加
+try:
+    cur.execute("ALTER TABLE kaji ADD COLUMN time TEXT")
+except:
+    pass
+
 st.title("🏠家事 実績🐖")
 
 # -------------------------
-# 入力フォーム
+# セッション状態の初期化
 # -------------------------
-task = st.selectbox("家事の種類", ["🍳料理", "🫗皿洗い", "👕洗濯", "🧹掃除", "🛒買い物","🚮ゴミ出し","🛁風呂掃除","🚽トイレ掃除","💧水回り"])
-person = st.selectbox("担当者", ["Miちゃん", "Piちゃん"])
+if "selected_time" not in st.session_state:
+    st.session_state.selected_time = None
+
+if "selected_person" not in st.session_state:
+    st.session_state.selected_person = None
+
+# -------------------------
+# 時間ボタン（丸ボタン風）
+# -------------------------
+st.write("かかった時間")
+
+time_options = ["5分", "10分", "15分", "20分", "30分", "45分", "60分"]
+cols = st.columns(len(time_options))
+
+for i, t in enumerate(time_options):
+    # 選択中は色を変える
+    if st.session_state.selected_time == t:
+        button_style = f"background-color:#ffcc00; color:black; padding:10px; border-radius:50%;"
+    else:
+        button_style = f"background-color:#eeeeee; color:black; padding:10px; border-radius:50%;"
+
+    if cols[i].button(t, key=f"time_{t}"):
+        st.session_state.selected_time = t
+
+# -------------------------
+# 名前ボタン
+# -------------------------
+st.write("担当者")
+
+person_options = ["Piちゃん", "Miちゃん"]
+cols = st.columns(len(person_options))
+
+for i, p in enumerate(person_options):
+    if st.session_state.selected_person == p:
+        button_style = f"background-color:#66ccff; color:black; padding:10px; border-radius:10px;"
+    else:
+        button_style = f"background-color:#eeeeee; color:black; padding:10px; border-radius:10px;"
+
+    if cols[i].button(p, key=f"person_{p}"):
+        st.session_state.selected_person = p
+
+# -------------------------
+# 家事の種類（プルダウン）
+# -------------------------
+task = st.selectbox("家事の種類", ["🍳料理", "🫗皿洗い", "👕洗濯", "🧹掃除", "🛒買い物",
+                                "🚮ゴミ出し","🛁風呂掃除","🚽トイレ掃除","💧水回り"])
+
 date = st.date_input("日付", datetime.now())
 
+# -------------------------
+# 登録処理
+# -------------------------
 if st.button("登録"):
-    cur.execute("INSERT INTO kaji (date, task, person) VALUES (?, ?, ?)",
-                (str(date), task, person))
-    conn.commit()
-    st.success("登録しやした！")
+    if not st.session_state.selected_time or not st.session_state.selected_person:
+        st.error("時間と担当者を選択してください")
+    else:
+        cur.execute(
+            "INSERT INTO kaji (date, task, person, time) VALUES (?, ?, ?, ?)",
+            (str(date), task, st.session_state.selected_person, st.session_state.selected_time)
+        )
+        conn.commit()
+        st.success("登録しやした！")
 
 # -------------------------
 # バージョン履歴
 # -------------------------
 with st.expander("バージョン履歴"):
     st.write("""
+- v1.4 260208_時間・名前をボタン選択式に変更
+- v1.3 260208_時間入力（ラジオボタン）を追加
 - v1.2 260208_削除機能を追加
 - v1.2 260207_絵文字で分かりやすく表示
 - v1.0 260207_初期リリース
@@ -50,14 +112,9 @@ def delete_task(task_id):
 
 params = st.query_params
 
-# 削除処理
 if "delete" in params:
     delete_task(params["delete"])
-
-    # URLパラメータを消す
     st.query_params.clear()
-
-    # 再読み込み
     st.rerun()
 
 st.subheader("実績一覧")
@@ -66,6 +123,17 @@ df = pd.read_sql_query("SELECT * FROM kaji", conn)
 
 # 表示用の連番
 df["no"] = range(1, len(df) + 1)
+
+# -------------------------
+# CSVダウンロードボタン
+# -------------------------
+csv = df.to_csv(index=False).encode("utf-8")
+st.download_button(
+    label="📥 CSVをダウンロード",
+    data=csv,
+    file_name="kaji.csv",
+    mime="text/csv"
+)
 
 # -------------------------
 # CSS（横並び）
@@ -109,6 +177,7 @@ for _, row in df.iterrows():
             <div>{row["date"]}</div>
             <div>{row["task"]}</div>
             <div>{row["person"]}</div>
+            <div>{row["time"]}</div>
         </div>
         <a class="delete-btn" href="/?delete={row['id']}">削除</a>
     </div>
