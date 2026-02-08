@@ -48,12 +48,6 @@ def delete_task(task_id):
     cur.execute("DELETE FROM kaji WHERE id = ?", (task_id,))
     conn.commit()
 
-# URL パラメータで削除
-params = st.query_params
-if "delete" in params:
-    delete_task(params["delete"])
-    st.experimental_rerun()
-
 st.subheader("実績一覧")
 
 df = pd.read_sql_query("SELECT * FROM kaji", conn)
@@ -87,19 +81,34 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------
-# 行を描画（削除ボタンは HTML）
+# 行を描画（1行＝1つのHTMLブロック）
 # -------------------------
 for _, row in df.iterrows():
-    st.markdown('<div class="row">', unsafe_allow_html=True)
 
-    st.markdown(f'<div class="cell">{row["id"]}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="cell">{row["date"]}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="cell">{row["task"]}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="cell">{row["person"]}</div>', unsafe_allow_html=True)
+    html = f"""
+    <div class="row">
+        <div class="cell">{row["id"]}</div>
+        <div class="cell">{row["date"]}</div>
+        <div class="cell">{row["task"]}</div>
+        <div class="cell">{row["person"]}</div>
+        <form action="" method="post">
+            <input type="hidden" name="delete_id" value="{row['id']}">
+            <button class="delete-btn">削除</button>
+        </form>
+    </div>
+    """
 
-    st.markdown(
-        f'<a class="delete-btn" href="/?delete={row["id"]}">削除</a>',
-        unsafe_allow_html=True
-    )
+    st.markdown(html, unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+# -------------------------
+# POSTで削除を受け取る
+# -------------------------
+if "delete_id" in st.session_state:
+    delete_task(st.session_state["delete_id"])
+    st.session_state.pop("delete_id")
+    st.rerun()
+
+# HTMLフォームのPOSTを拾う
+if st.query_params.get("delete_id"):
+    st.session_state["delete_id"] = st.query_params["delete_id"]
+    st.rerun()
