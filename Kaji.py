@@ -83,55 +83,51 @@ st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
 # -------------------------
 st.markdown("""
 <style>
-.row-box {
-    display: flex;
-    flex-direction: row;
-    border-bottom: 1px solid #ccc;
-    padding: 6px 0;
-    min-width: 750px; /* スマホで横スクロール */
-}
-.cell {
-    padding-right: 12px;
-    white-space: nowrap;
-}
-.scroll-area {
-    overflow-x: auto;
+.table-wrap { overflow-x: auto; width: 100%; }
+table { border-collapse: collapse; width: 100%; min-width: 750px; }
+th, td { border: 1px solid #ccc; padding: 6px 10px; white-space: nowrap; }
+.del-btn {
+    background-color: red;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: none;
 }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="scroll-area">', unsafe_allow_html=True)
+st.markdown('<div class="table-wrap"><table>', unsafe_allow_html=True)
 
 # ヘッダー
 st.markdown("""
-<div class="row-box">
-    <div class="cell"><b>ID</b></div>
-    <div class="cell"><b>日付</b></div>
-    <div class="cell"><b>家事</b></div>
-    <div class="cell"><b>担当</b></div>
-    <div class="cell"><b>時間</b></div>
-    <div class="cell"><b>削除</b></div>
-</div>
+<tr>
+<th>ID</th><th>日付</th><th>家事</th><th>担当</th><th>時間</th><th>削除</th>
+</tr>
 """, unsafe_allow_html=True)
 
 # 行ループ
 for _, row in df.iterrows():
-    # 1行の枠
-    st.markdown('<div class="row-box">', unsafe_allow_html=True)
 
-    st.markdown(f"<div class='cell'>{row['id']}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='cell'>{row['date']}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='cell'>{row['task']}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='cell'>{row['person']}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='cell'>{row['time']}</div>", unsafe_allow_html=True)
+    # Streamlitフォームで削除処理
+    with st.form(key=f"form_{row['id']}", clear_on_submit=True):
+        st.markdown(
+            f"""
+            <tr>
+                <td>{row['id']}</td>
+                <td>{row['date']}</td>
+                <td>{row['task']}</td>
+                <td>{row['person']}</td>
+                <td>{row['time']}</td>
+                <td><button class="del-btn">削除</button></td>
+            </tr>
+            """,
+            unsafe_allow_html=True
+        )
 
-    # 削除ボタンだけ Streamlit
-    delete_col = st.columns(1)[0]
-    if delete_col.button("削除", key=f"del_{row['id']}"):
-        cur.execute("DELETE FROM kaji WHERE id = ?", (row["id"],))
-        conn.commit()
-        st.rerun()
+        submitted = st.form_submit_button("")
+        if submitted:
+            cur.execute("DELETE FROM kaji WHERE id = ?", (row["id"],))
+            conn.commit()
+            st.rerun()
 
-    st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown("</div>", unsafe_allow_html=True)
+st.markdown("</table></div>", unsafe_allow_html=True)
