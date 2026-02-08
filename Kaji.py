@@ -74,20 +74,26 @@ if "selected_person" not in st.session_state:
     st.session_state.selected_person = None
 
 # -------------------------
-# CSS：横スクロール行
+# CSS：横並びレイアウト強制（一覧用）
 # -------------------------
 st.markdown("""
 <style>
-.scroll-row {
+.record-row {
     display: flex;
     flex-direction: row;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 8px;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #444;
 }
-.scroll-row > div {
-    flex: 0 0 auto;
+.record-row div {
+    padding-right: 8px;
 }
+.col-no { width: 40px; }
+.col-date { width: 120px; }
+.col-task { width: 120px; }
+.col-person { width: 80px; }
+.col-time { width: 80px; }
+.col-del { width: 60px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -146,8 +152,10 @@ st.subheader("実績一覧")
 df = pd.read_sql_query("SELECT * FROM kaji ORDER BY id DESC", conn)
 df["no"] = range(1, len(df) + 1)
 
+# CSVダウンロード
 csv = df.to_csv(index=False).encode("utf-8")
 st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
+
 # -------------------------
 # 表示 & 削除（横並び）
 # -------------------------
