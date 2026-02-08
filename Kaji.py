@@ -26,42 +26,40 @@ except:
 st.title("🏠家事 実績🐖")
 
 # -------------------------
-# セッション状態の初期化
-# -------------------------
-if "selected_time" not in st.session_state:
-    st.session_state.selected_time = None
-
-if "selected_person" not in st.session_state:
-    st.session_state.selected_person = None
-
-# -------------------------
-# CSS（ボタンデザイン）
+# CSS（radioをボタン風にする）
 # -------------------------
 st.markdown("""
 <style>
-.button-row {
+/* 横並び */
+.radio-row > div {
     display: flex;
     flex-direction: row;
     gap: 8px;
     overflow-x: auto;
-    padding-bottom: 6px;
 }
 
-.sel-btn {
+/* ボタン風に変形 */
+.stRadio > div {
+    flex-direction: row !important;
+}
+
+.stRadio label {
+    background-color: #eee;
     padding: 10px 16px;
     border-radius: 20px;
     border: 1px solid #aaa;
-    background-color: #eee;
-    cursor: pointer;
     white-space: nowrap;
+    cursor: pointer;
 }
 
-.sel-btn.selected {
+/* 選択中 */
+.stRadio label[data-selected="true"] {
     background-color: #ffcc00 !important;
     font-weight: bold;
 }
 
-.sel-btn.person-selected {
+/* 担当者用（色違い） */
+.person-radio label[data-selected="true"] {
     background-color: #66ccff !important;
     font-weight: bold;
 }
@@ -69,52 +67,30 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------
-# 時間ボタン（HTML + JS）
+# 時間（radio）
 # -------------------------
 st.write("かかった時間")
 
 time_options = ["5分", "10分", "15分", "20分", "30分", "45分", "60分"]
 
-time_html = '<div class="button-row">'
-for t in time_options:
-    selected = "selected" if st.session_state.selected_time == t else ""
-    time_html += f"""
-        <button class="sel-btn {selected}" onclick="window.location.href='/?time={t}'">{t}</button>
-    """
-time_html += "</div>"
-
-st.markdown(time_html, unsafe_allow_html=True)
-
-# 選択処理
-params = st.query_params
-if "time" in params:
-    st.session_state.selected_time = params["time"]
-    st.query_params.clear()
-    st.rerun()
+selected_time = st.radio(
+    "",
+    time_options,
+    horizontal=True,
+    key="time_radio"
+)
 
 # -------------------------
-# 担当者ボタン（HTML + JS）
+# 担当者（radio）
 # -------------------------
 st.write("担当者")
 
-person_options = ["Piちゃん", "Miちゃん"]
-
-person_html = '<div class="button-row">'
-for p in person_options:
-    selected = "person-selected" if st.session_state.selected_person == p else ""
-    person_html += f"""
-        <button class="sel-btn {selected}" onclick="window.location.href='/?person={p}'">{p}</button>
-    """
-person_html += "</div>"
-
-st.markdown(person_html, unsafe_allow_html=True)
-
-# 選択処理
-params = st.query_params
-if "person" in params:
-    st.session_state.selected_person = params["person"]
-    st.query_params.clear()
-    st.rerun()
+selected_person = st.radio(
+    "",
+    ["Piちゃん", "Miちゃん"],
+    horizontal=True,
+    key="person_radio"
+)
 
 # -------------------------
 # 家事の種類
@@ -128,30 +104,27 @@ date = st.date_input("日付", datetime.now())
 # 登録処理
 # -------------------------
 if st.button("登録"):
-    if not st.session_state.selected_time or not st.session_state.selected_person:
-        st.error("時間と担当者を選択してください")
-    else:
-        cur.execute(
-            "INSERT INTO kaji (date, task, person, time) VALUES (?, ?, ?, ?)",
-            (str(date), task, st.session_state.selected_person, st.session_state.selected_time)
-        )
-        conn.commit()
-        st.success("登録しやした！")
+    cur.execute(
+        "INSERT INTO kaji (date, task, person, time) VALUES (?, ?, ?, ?)",
+        (str(date), task, selected_person, selected_time)
+    )
+    conn.commit()
+    st.success("登録しやした！")
 
 # -------------------------
 # バージョン履歴
 # -------------------------
 with st.expander("バージョン履歴"):
     st.write("""
+- v2.0 260208_radioをボタン風に変形し、完全安定化
 - v1.9 260208_1クリック選択・改行なし・完全安定版
-- v1.8 260208_1クリック選択方式に完全対応（改行なし・色変化）
-- v1.7 260208_URLパラメータ方式を廃止し、安定動作に改善
-- v1.6 260208_時間ボタンの改行問題を修正・選択色を改善
-- v1.5 260208_時間・名前ボタンの選択状態が色で分かるように改善
+- v1.8 260208_1クリック選択方式に完全対応
+- v1.7 260208_URLパラメータ方式を廃止
+- v1.6 260208_時間ボタンの改行問題を修正
+- v1.5 260208_選択状態が色で分かるように改善
 - v1.4 260208_時間・名前をボタン選択式に変更
 - v1.3 260208_時間入力（ラジオボタン）を追加
 - v1.2 260208_削除機能を追加
-- v1.2 260207_絵文字で分かりやすく表示
 - v1.0 260207_初期リリース
     """)
 
@@ -170,6 +143,7 @@ if "delete" in params:
 
 st.subheader("実績一覧")
 
+# 最新順（降順）
 df = pd.read_sql_query("SELECT * FROM kaji ORDER BY id DESC", conn)
 df["no"] = range(1, len(df) + 1)
 
