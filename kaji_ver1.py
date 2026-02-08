@@ -17,21 +17,6 @@ CREATE TABLE IF NOT EXISTS kaji (
 """)
 conn.commit()
 
-# -------------------------
-# クエリパラメータで削除処理
-# -------------------------
-params = st.experimental_get_query_params()
-if "delete_id" in params:
-    try:
-        delete_id = int(params["delete_id"][0])
-        cur.execute("DELETE FROM kaji WHERE id = ?", (delete_id,))
-        conn.commit()
-    except Exception:
-        pass
-    # クエリパラメータをクリアしてリロード
-    st.experimental_set_query_params()
-    st.experimental_rerun()
-
 # タイトル
 st.title("🏠家事 実績🐖")
 
@@ -80,7 +65,7 @@ if st.button("登録"):
     )
     conn.commit()
     st.success("登録しやした！")
-    st.experimental_rerun()
+    st.rerun()
 
 # -------------------------
 # 一覧表示
@@ -94,39 +79,55 @@ csv = df.to_csv(index=False).encode("utf-8")
 st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
 
 # -------------------------
-# スマホ対応テーブル（横スクロール & 改行禁止）
+# スマホ対応：横スクロール可能な枠
 # -------------------------
-table_html = """<style>
+st.markdown("""
+<style>
 .table-wrap { overflow-x: auto; width: 100%; }
 table { border-collapse: collapse; width: 100%; min-width: 750px; }
 th, td { border: 1px solid #ccc; padding: 6px 10px; white-space: nowrap; }
-.del-link {
+.del-btn {
     background-color: red;
     color: white;
     padding: 4px 8px;
     border-radius: 4px;
-    text-decoration: none;
+    border: none;
 }
 </style>
-<div class="table-wrap">
-<table>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="table-wrap"><table>', unsafe_allow_html=True)
+
+# ヘッダー
+st.markdown("""
 <tr>
 <th>ID</th><th>日付</th><th>家事</th><th>担当</th><th>時間</th><th>削除</th>
 </tr>
-"""
+""", unsafe_allow_html=True)
 
+# 行ループ
 for _, row in df.iterrows():
-    table_html += (
-        f"<tr>"
-        f"<td>{row['id']}</td>"
-        f"<td>{row['date']}</td>"
-        f"<td>{row['task']}</td>"
-        f"<td>{row['person']}</td>"
-        f"<td>{row['time']}</td>"
-        f"<td><a class='del-link' href='?delete_id={row['id']}'>削除</a></td>"
-        f"</tr>"
-    )
 
-table_html += "</table></div>"
+    # Streamlitフォームで削除処理
+    with st.form(key=f"form_{row['id']}", clear_on_submit=True):
+        st.markdown(
+            f"""
+            <tr>
+                <td>{row['id']}</td>
+                <td>{row['date']}</td>
+                <td>{row['task']}</td>
+                <td>{row['person']}</td>
+                <td>{row['time']}</td>
+                <td><button class="del-btn">削除</button></td>
+            </tr>
+            """,
+            unsafe_allow_html=True
+        )
 
-st.markdown(table_html, unsafe_allow_html=True)
+        submitted = st.form_submit_button("")
+        if submitted:
+            cur.execute("DELETE FROM kaji WHERE id = ?", (row["id"],))
+            conn.commit()
+            st.rerun()
+
+st.markdown("</table></div>", unsafe_allow_html=True)
