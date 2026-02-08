@@ -78,6 +78,7 @@ th, td {
     padding: 4px 8px;
     border-radius: 4px;
     cursor: pointer;
+    text-decoration: none;
 }
 </style>
 
