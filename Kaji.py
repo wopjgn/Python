@@ -32,29 +32,6 @@ if st.button("登録"):
     st.success("登録しました！")
 
 # -------------------------
-# 削除機能
-# -------------------------
-
-def delete_task(task_id):
-    cur.execute("DELETE FROM kaji WHERE id = ?", (task_id,))
-    conn.commit()
-
-st.subheader("実績一覧")
-
-df = pd.read_sql_query("SELECT * FROM kaji", conn)
-
-# 削除ボタン付きの表を作る
-for index, row in df.iterrows():
-    cols = st.columns([1, 3, 3, 3, 2])  # 表示の幅調整
-    cols[0].write(row["id"])
-    cols[1].write(row["date"])
-    cols[2].write(row["task"])
-    cols[3].write(row["person"])
-    if cols[4].button("削除", key=f"del_{row['id']}"):
-        delete_task(row["id"])
-        st.experimental_rerun()
-
-# -------------------------
 # バージョン履歴（expander）
 # -------------------------
 with st.expander("バージョン履歴"):
@@ -63,3 +40,77 @@ with st.expander("バージョン履歴"):
 - v1.2 260207_絵文字で分かりやすく表示
 - v1.0 260207_初期リリース
     """)
+
+# -------------------------
+# 削除機能
+# -------------------------
+def delete_task(task_id):
+    cur.execute("DELETE FROM kaji WHERE id = ?", (task_id,))
+    conn.commit()
+
+st.subheader("実績一覧")
+
+df = pd.read_sql_query("SELECT * FROM kaji", conn)
+
+# -------------------------
+# HTMLテーブル（スマホ最適化）
+# -------------------------
+table_html = """
+<style>
+.table-container {
+    overflow-x: auto;
+    width: 100%;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* スマホで横スクロール */
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+    white-space: nowrap; /* 折り返し防止 */
+}
+.delete-btn {
+    color: white;
+    background-color: red;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+</style>
+
+<div class="table-container">
+<table>
+    <tr>
+        <th>ID</th>
+        <th>日付</th>
+        <th>家事</th>
+        <th>担当</th>
+        <th>削除</th>
+    </tr>
+"""
+
+for _, row in df.iterrows():
+    table_html += f"""
+    <tr>
+        <td>{row['id']}</td>
+        <td>{row['date']}</td>
+        <td>{row['task']}</td>
+        <td>{row['person']}</td>
+        <td><a href="/?delete_id={row['id']}" class="delete-btn">削除</a></td>
+    </tr>
+    """
+
+table_html += "</table></div>"
+
+st.markdown(table_html, unsafe_allow_html=True)
+
+# -------------------------
+# 削除処理
+# -------------------------
+delete_id = st.query_params.get("delete_id")
+if delete_id:
+    delete_task(delete_id)
+    st.experimental_rerun()
