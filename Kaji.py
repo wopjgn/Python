@@ -53,39 +53,40 @@ st.subheader("実績一覧")
 df = pd.read_sql_query("SELECT * FROM kaji", conn)
 
 # -------------------------
-# CSS：columns をスマホでも横並びに固定
+# CSS：行を横並びに強制
 # -------------------------
 st.markdown("""
 <style>
-.row-container {
+.row {
     display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
     overflow-x: auto;
     white-space: nowrap;
-    border-bottom: 1px solid #ddd;
-    padding: 6px 0;
 }
-.row-item {
+.cell {
     flex: 0 0 auto;
-    padding-right: 20px;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------
-# 行を横スクロール可能にして描画
+# 行を描画（絶対に横並び）
 # -------------------------
 for _, row in df.iterrows():
-    with st.container():
-        st.markdown('<div class="row-container">', unsafe_allow_html=True)
+    st.markdown('<div class="row">', unsafe_allow_html=True)
 
-        st.markdown(f'<div class="row-item">{row["id"]}</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="row-item">{row["date"]}</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="row-item">{row["task"]}</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="row-item">{row["person"]}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="cell">{row["id"]}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="cell">{row["date"]}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="cell">{row["task"]}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="cell">{row["person"]}</div>', unsafe_allow_html=True)
 
-        # 削除ボタン（Streamlit純正）
-        if st.button("削除", key=f"del_{row['id']}"):
-            delete_task(row["id"])
-            st.experimental_rerun()
+    # 削除ボタン（Streamlit純正）
+    if st.button("削除", key=f"del_{row['id']}"):
+        delete_task(row["id"])
+        st.experimental_rerun()
 
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
