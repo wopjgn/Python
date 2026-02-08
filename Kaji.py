@@ -29,7 +29,7 @@ if st.button("登録"):
     cur.execute("INSERT INTO kaji (date, task, person) VALUES (?, ?, ?)",
                 (str(date), task, person))
     conn.commit()
-    st.success("登録しました！")
+    st.success("登録しやした！")
 
 # -------------------------
 # バージョン履歴
