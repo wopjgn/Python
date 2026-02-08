@@ -17,16 +17,10 @@ CREATE TABLE IF NOT EXISTS kaji (
 """)
 conn.commit()
 
-# time列がなければ追加
-try:
-    cur.execute("ALTER TABLE kaji ADD COLUMN time TEXT")
-except:
-    pass
-
 st.title("🏠家事 実績🐖")
 
 # -------------------------
-# セッション状態の初期化
+# セッション状態
 # -------------------------
 if "selected_time" not in st.session_state:
     st.session_state.selected_time = None
@@ -35,77 +29,20 @@ if "selected_person" not in st.session_state:
     st.session_state.selected_person = None
 
 # -------------------------
-# CSS（角丸ボタンデザイン）
-# -------------------------
-st.markdown("""
-<style>
-.button-row {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 8px;
-}
-
-.button-row form {
-    display: inline-block !important;
-    margin: 0;
-    padding: 0;
-}
-
-.btn {
-    padding: 10px 18px !important;
-    border-radius: 12px !important;
-    border: 1px solid #aaa !important;
-    background-color: #f2f2f2 !important;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-    font-size: 16px !important;
-    color: black !important;
-}
-
-.btn.time-selected {
-    background-color: #4da3ff !important;
-    color: white !important;
-    font-weight: bold !important;
-}
-
-.btn.person-selected {
-    background-color: #4dcc88 !important;
-    color: white !important;
-    font-weight: bold !important;
-}
-
-.btn:hover {
-    background-color: #e0e0e0 !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# -------------------------
 # 時間ボタン
 # -------------------------
 st.write("かかった時間")
 
 time_options = ["5分", "10分", "15分", "20分", "30分", "45分", "60分"]
 
-html = '<div class="button-row">'
-for t in time_options:
-    selected = "time-selected" if st.session_state.selected_time == t else ""
-    html += '''
-        <form method="get">
-            <input type="hidden" name="time" value="{t}">
-            <button class="btn {selected}" type="submit">{t}</button>
-        </form>
-    '''.format(t=t, selected=selected)
-html += "</div>"
+cols = st.columns(len(time_options))
+for i, t in enumerate(time_options):
+    if cols[i].button(t):
+        st.session_state.selected_time = t
 
-st.markdown(html, unsafe_allow_html=True)
-
-params = st.query_params
-if "time" in params:
-    st.session_state.selected_time = params["time"]
-    st.query_params.clear()
+# 選択中の時間表示
+if st.session_state.selected_time:
+    st.success(f"選択中の時間：{st.session_state.selected_time}")
 
 # -------------------------
 # 担当者ボタン
@@ -114,29 +51,22 @@ st.write("担当者")
 
 person_options = ["Piちゃん", "Miちゃん"]
 
-html = '<div class="button-row">'
-for p in person_options:
-    selected = "person-selected" if st.session_state.selected_person == p else ""
-    html += '''
-        <form method="get">
-            <input type="hidden" name="person" value="{p}">
-            <button class="btn {selected}" type="submit">{p}</button>
-        </form>
-    '''.format(p=p, selected=selected)
-html += "</div>"
+cols = st.columns(len(person_options))
+for i, p in enumerate(person_options):
+    if cols[i].button(p):
+        st.session_state.selected_person = p
 
-st.markdown(html, unsafe_allow_html=True)
-
-params = st.query_params
-if "person" in params:
-    st.session_state.selected_person = params["person"]
-    st.query_params.clear()
+# 選択中の担当者表示
+if st.session_state.selected_person:
+    st.success(f"選択中の担当者：{st.session_state.selected_person}")
 
 # -------------------------
 # 家事の種類
 # -------------------------
-task = st.selectbox("家事の種類", ["🍳料理", "🫗皿洗い", "👕洗濯", "🧹掃除", "🛒買い物",
-                                "🚮ゴミ出し","🛁風呂掃除","🚽トイレ掃除","💧水回り"])
+task = st.selectbox("家事の種類", [
+    "🍳料理", "🫗皿洗い", "👕洗濯", "🧹掃除", "🛒買い物",
+    "🚮ゴミ出し", "🛁風呂掃除", "🚽トイレ掃除", "💧水回り"
+])
 
 date = st.date_input("日付", datetime.now())
 
@@ -155,19 +85,6 @@ if st.button("登録"):
         st.success("登録しやした！")
 
 # -------------------------
-# 削除処理
-# -------------------------
-def delete_task(task_id):
-    cur.execute("DELETE FROM kaji WHERE id = ?", (task_id,))
-    conn.commit()
-
-params = st.query_params
-if "delete" in params:
-    delete_task(params["delete"])
-    st.query_params.clear()
-    st.rerun()
-
-# -------------------------
 # 一覧表示
 # -------------------------
 st.subheader("実績一覧")
@@ -175,54 +92,22 @@ st.subheader("実績一覧")
 df = pd.read_sql_query("SELECT * FROM kaji ORDER BY id DESC", conn)
 df["no"] = range(1, len(df) + 1)
 
+# CSVダウンロード
 csv = df.to_csv(index=False).encode("utf-8")
 st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
 
-st.markdown("""
-<style>
-.row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #ddd;
-    padding: 10px 0;
-    white-space: nowrap;
-    overflow-x: auto;
-}
-.row-left {
-    display: flex;
-    flex-direction: row;
-    gap: 16px;
-}
-.delete-btn {
-    background-color: red;
-    color: white;
-    padding: 4px 10px;
-    border-radius: 4px;
-    text-decoration: none;
-}
-</style>
-""", unsafe_allow_html=True)
-
+# -------------------------
+# 表示 & 削除
+# -------------------------
 for _, row in df.iterrows():
-    html = '''
-    <div class="row">
-        <div class="row-left">
-            <div>{no}</div>
-            <div>{date}</div>
-            <div>{task}</div>
-            <div>{person}</div>
-            <div>{time}</div>
-        </div>
-        <a class="delete-btn" href="/?delete={id}">削除</a>
-    </div>
-    '''.format(
-        no=row["no"],
-        date=row["date"],
-        task=row["task"],
-        person=row["person"],
-        time=row["time"],
-        id=row["id"]
-    )
-    st.markdown(html, unsafe_allow_html=True)
+    cols = st.columns([1, 3, 3, 2, 2, 2])
+    cols[0].write(row["no"])
+    cols[1].write(row["date"])
+    cols[2].write(row["task"])
+    cols[3].write(row["person"])
+    cols[4].write(row["time"])
+
+    if cols[5].button("削除", key=f"del_{row['id']}"):
+        cur.execute("DELETE FROM kaji WHERE id = ?", (row["id"],))
+        conn.commit()
+        st.rerun()
