@@ -4,7 +4,10 @@ import sqlite3
 from datetime import datetime
 
 # DB接続
-conn = sqlite3.connect("kaji.db")
+import os
+DB_PATH = os.path.join(os.getcwd(), "kaji.db")
+conn = sqlite3.connect(DB_PATH)
+
 cur = conn.cursor()
 cur.execute("""
 CREATE TABLE IF NOT EXISTS kaji (
