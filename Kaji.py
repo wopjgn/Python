@@ -21,16 +21,17 @@ conn.commit()
 st.title("🏠家事 実績🐖")
 
 # -------------------------
-# バージョン履歴（右上小さく固定）
+# バージョン履歴（右上固定）
 # -------------------------
 st.markdown("""
 <style>
 .version-box {
-    position: absolute;
+    position: fixed;
     top: 8px;
     right: 12px;
     z-index: 999;
     font-size: 12px;
+    pointer-events: none;
 }
 .version-box .streamlit-expanderHeader {
     font-size: 12px !important;
@@ -74,7 +75,7 @@ if "selected_person" not in st.session_state:
     st.session_state.selected_person = None
 
 # -------------------------
-# 一覧用 CSS（これが無いと一覧が消える）
+# 一覧用 CSS
 # -------------------------
 st.markdown("""
 <style>
