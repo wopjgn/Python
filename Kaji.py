@@ -69,35 +69,52 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------
-# 時間ボタン（1クリックで即選択）
+# 時間ボタン（HTML + JS）
 # -------------------------
 st.write("かかった時間")
 
 time_options = ["5分", "10分", "15分", "20分", "30分", "45分", "60分"]
 
-cols = st.columns(len(time_options))
+time_html = '<div class="button-row">'
+for t in time_options:
+    selected = "selected" if st.session_state.selected_time == t else ""
+    time_html += f"""
+        <button class="sel-btn {selected}" onclick="window.location.href='/?time={t}'">{t}</button>
+    """
+time_html += "</div>"
 
-for i, t in enumerate(time_options):
-    selected = (st.session_state.selected_time == t)
-    label = f"✓ {t}" if selected else t
+st.markdown(time_html, unsafe_allow_html=True)
 
-    if cols[i].button(label, key=f"time_{t}"):
-        st.session_state.selected_time = t
+# 選択処理
+params = st.query_params
+if "time" in params:
+    st.session_state.selected_time = params["time"]
+    st.query_params.clear()
+    st.rerun()
 
 # -------------------------
-# 担当者ボタン（1クリックで即選択）
+# 担当者ボタン（HTML + JS）
 # -------------------------
 st.write("担当者")
 
 person_options = ["Piちゃん", "Miちゃん"]
-cols = st.columns(len(person_options))
 
-for i, p in enumerate(person_options):
-    selected = (st.session_state.selected_person == p)
-    label = f"✓ {p}" if selected else p
+person_html = '<div class="button-row">'
+for p in person_options:
+    selected = "person-selected" if st.session_state.selected_person == p else ""
+    person_html += f"""
+        <button class="sel-btn {selected}" onclick="window.location.href='/?person={p}'">{p}</button>
+    """
+person_html += "</div>"
 
-    if cols[i].button(label, key=f"person_{p}"):
-        st.session_state.selected_person = p
+st.markdown(person_html, unsafe_allow_html=True)
+
+# 選択処理
+params = st.query_params
+if "person" in params:
+    st.session_state.selected_person = params["person"]
+    st.query_params.clear()
+    st.rerun()
 
 # -------------------------
 # 家事の種類
@@ -126,6 +143,7 @@ if st.button("登録"):
 # -------------------------
 with st.expander("バージョン履歴"):
     st.write("""
+- v1.9 260208_1クリック選択・改行なし・完全安定版
 - v1.8 260208_1クリック選択方式に完全対応（改行なし・色変化）
 - v1.7 260208_URLパラメータ方式を廃止し、安定動作に改善
 - v1.6 260208_時間ボタンの改行問題を修正・選択色を改善
@@ -152,7 +170,7 @@ if "delete" in params:
 
 st.subheader("実績一覧")
 
-df = pd.read_sql_query("SELECT * FROM kaji", conn)
+df = pd.read_sql_query("SELECT * FROM kaji ORDER BY id DESC", conn)
 df["no"] = range(1, len(df) + 1)
 
 # -------------------------
