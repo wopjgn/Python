@@ -32,7 +32,7 @@ if st.button("登録"):
     st.success("登録しました！")
 
 # -------------------------
-# バージョン履歴（expander）
+# バージョン履歴
 # -------------------------
 with st.expander("バージョン履歴"):
     st.write("""
@@ -53,65 +53,39 @@ st.subheader("実績一覧")
 df = pd.read_sql_query("SELECT * FROM kaji", conn)
 
 # -------------------------
-# HTMLテーブル（スマホ最適化）
+# CSS：columns をスマホでも横並びに固定
 # -------------------------
-table_html = """
+st.markdown("""
 <style>
-.table-container {
+.row-container {
+    display: flex;
     overflow-x: auto;
-    width: 100%;
+    white-space: nowrap;
+    border-bottom: 1px solid #ddd;
+    padding: 6px 0;
 }
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 600px; /* スマホで横スクロール */
-}
-th, td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: left;
-    white-space: nowrap; /* 折り返し防止 */
-}
-.delete-btn {
-    color: white;
-    background-color: red;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    text-decoration: none;
+.row-item {
+    flex: 0 0 auto;
+    padding-right: 20px;
 }
 </style>
+""", unsafe_allow_html=True)
 
-<div class="table-container">
-<table>
-    <tr>
-        <th>ID</th>
-        <th>日付</th>
-        <th>家事</th>
-        <th>担当</th>
-        <th>削除</th>
-    </tr>
-"""
-
+# -------------------------
+# 行を横スクロール可能にして描画
+# -------------------------
 for _, row in df.iterrows():
-    table_html += f"""
-    <tr>
-        <td>{row['id']}</td>
-        <td>{row['date']}</td>
-        <td>{row['task']}</td>
-        <td>{row['person']}</td>
-        <td><a href="/?delete_id={row['id']}" class="delete-btn">削除</a></td>
-    </tr>
-    """
+    with st.container():
+        st.markdown('<div class="row-container">', unsafe_allow_html=True)
 
-table_html += "</table></div>"
+        st.markdown(f'<div class="row-item">{row["id"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="row-item">{row["date"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="row-item">{row["task"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="row-item">{row["person"]}</div>', unsafe_allow_html=True)
 
-st.markdown(table_html, unsafe_allow_html=True)
+        # 削除ボタン（Streamlit純正）
+        if st.button("削除", key=f"del_{row['id']}"):
+            delete_task(row["id"])
+            st.experimental_rerun()
 
-# -------------------------
-# 削除処理
-# -------------------------
-delete_id = st.query_params.get("delete_id")
-if delete_id:
-    delete_task(delete_id)
-    st.experimental_rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
