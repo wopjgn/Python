@@ -77,45 +77,55 @@ df = pd.read_sql_query("SELECT * FROM kaji ORDER BY id DESC", conn)
 # CSVダウンロード
 csv = df.to_csv(index=False).encode("utf-8")
 st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
-# -------------------------
-# スマホ対応テーブル（横スクロール & 改行禁止）
-# -------------------------
 
+# -------------------------
+# スマホ対応：横スクロール可能な枠
+# -------------------------
 st.markdown("""
 <style>
-.table-wrap { overflow-x: auto; width: 100%; }
-table { border-collapse: collapse; width: 100%; min-width: 750px; }
-th, td { border: 1px solid #ccc; padding: 6px 10px; white-space: nowrap; }
+.scroll-box {
+    overflow-x: auto;
+    white-space: nowrap;
+}
+.record-row {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+    padding: 6px 0;
+}
+.record-cell {
+    padding-right: 12px;
+    min-width: 80px;
+}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="table-wrap">', unsafe_allow_html=True)
-st.markdown("<table>", unsafe_allow_html=True)
+st.markdown('<div class="scroll-box">', unsafe_allow_html=True)
 
 # ヘッダー
 st.markdown("""
-<tr>
-<th>ID</th><th>日付</th><th>家事</th><th>担当</th><th>時間</th><th>削除</th>
-</tr>
+<div class="record-row">
+    <div class="record-cell"><b>ID</b></div>
+    <div class="record-cell"><b>日付</b></div>
+    <div class="record-cell"><b>家事</b></div>
+    <div class="record-cell"><b>担当</b></div>
+    <div class="record-cell"><b>時間</b></div>
+    <div class="record-cell"><b>削除</b></div>
+</div>
 """, unsafe_allow_html=True)
 
 # 行ループ
 for _, row in df.iterrows():
-    st.markdown("<tr>", unsafe_allow_html=True)
+    cols = st.columns([1, 3, 3, 2, 2, 2])
 
-    st.markdown(f"<td>{row['id']}</td>", unsafe_allow_html=True)
-    st.markdown(f"<td>{row['date']}</td>", unsafe_allow_html=True)
-    st.markdown(f"<td>{row['task']}</td>", unsafe_allow_html=True)
-    st.markdown(f"<td>{row['person']}</td>", unsafe_allow_html=True)
-    st.markdown(f"<td>{row['time']}</td>", unsafe_allow_html=True)
+    cols[0].write(row["id"])
+    cols[1].write(row["date"])
+    cols[2].write(row["task"])
+    cols[3].write(row["person"])
+    cols[4].write(row["time"])
 
-    # 削除ボタンだけ Streamlit
-    col = st.columns(1)[0]
-    if col.button("削除", key=f"del_{row['id']}"):
+    if cols[5].button("削除", key=f"del_{row['id']}"):
         cur.execute("DELETE FROM kaji WHERE id = ?", (row["id"],))
         conn.commit()
         st.rerun()
 
-    st.markdown("</tr>", unsafe_allow_html=True)
-
-st.markdown("</table></div>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
