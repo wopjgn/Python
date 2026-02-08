@@ -79,7 +79,7 @@ csv = df.to_csv(index=False).encode("utf-8")
 st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
 
 # -------------------------
-# スマホ対応テーブル（横スクロール）
+# スマホ対応テーブル（横スクロール & 改行禁止）
 # -------------------------
 table_html = """
 <style>
@@ -87,16 +87,21 @@ table_html = """
     overflow-x: auto;
     width: 100%;
 }
+
+/* スマホで絶対に折り返さない */
 table {
     border-collapse: collapse;
     width: 100%;
-    min-width: 650px; /* スマホで横スクロール */
+    min-width: 750px;  /* ← ここが重要！スマホ幅より広くする */
 }
+
 th, td {
     border: 1px solid #ccc;
     padding: 6px 10px;
-    white-space: nowrap; /* 改行させない */
+    white-space: nowrap; /* ← 改行禁止 */
 }
+
+/* 削除ボタン */
 .del-btn {
     background-color: red;
     color: white;
