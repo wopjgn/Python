@@ -48,21 +48,27 @@ def delete_task(task_id):
     cur.execute("DELETE FROM kaji WHERE id = ?", (task_id,))
     conn.commit()
 
-# URLパラメータで削除
 params = st.query_params
+
+# 削除処理
 if "delete" in params:
     delete_task(params["delete"])
+
+    # URLパラメータを消す
+    st.query_params.clear()
+
+    # 再読み込み
     st.rerun()
 
 st.subheader("実績一覧")
 
 df = pd.read_sql_query("SELECT * FROM kaji", conn)
 
-# 表示用の連番を追加（1,2,3…）
+# 表示用の連番
 df["no"] = range(1, len(df) + 1)
 
 # -------------------------
-# CSS（横並びを強制）
+# CSS（横並び）
 # -------------------------
 st.markdown("""
 <style>
@@ -92,7 +98,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------
-# 行を描画（HTMLのみ → 横並びが安定）
+# 行を描画
 # -------------------------
 for _, row in df.iterrows():
 
