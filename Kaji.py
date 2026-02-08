@@ -74,16 +74,14 @@ if st.session_state.selected_time:
 # -------------------------
 st.write("担当者")
 
-person_options = ["Piちゃん", "Miちゃん"]
+person = st.radio(
+    "担当者を選択",
+    ["Piちゃん", "Miちゃん"],
+    horizontal=True
+)
 
-cols = st.columns(len(person_options))
-
-for col, p in zip(cols, person_options):
-    if col.button(p, key=f"person_{p}"):
-        st.session_state.selected_person = p
-
-if st.session_state.selected_person:
-    st.success(f"選択中の担当者：{st.session_state.selected_person}")
+st.session_state.selected_person = person
+st.success(f"選択中の担当者：{person}")
 
 # -------------------------
 # 家事の種類
