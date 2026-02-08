@@ -18,49 +18,24 @@ CREATE TABLE IF NOT EXISTS kaji (
 conn.commit()
 
 # -------------------------
-# クエリパラメータで削除処理
+# 削除処理（新しい query_params API）
 # -------------------------
-params = st.experimental_get_query_params()
+params = st.query_params
+
 if "delete_id" in params:
     try:
-        delete_id = int(params["delete_id"][0])
+        delete_id = int(params["delete_id"])
         cur.execute("DELETE FROM kaji WHERE id = ?", (delete_id,))
         conn.commit()
-    except Exception:
+    except:
         pass
-    # クエリパラメータをクリアしてリロード
-    st.experimental_set_query_params()
-    st.experimental_rerun()
+
+    # クエリパラメータをクリア
+    st.query_params = {}
+    st.rerun()
 
 # タイトル
 st.title("🏠家事 実績🐖")
-
-# -------------------------
-# バージョン履歴（右上固定）
-# -------------------------
-st.markdown("""
-<style>
-.version-box {
-    position: fixed;
-    top: 8px;
-    right: 12px;
-    z-index: 999;
-    font-size: 12px;
-    pointer-events: none;
-}
-</style>
-""", unsafe_allow_html=True)
-
-with st.container():
-    st.markdown('<div class="version-box">', unsafe_allow_html=True)
-    with st.expander("📘 バージョン", expanded=False):
-        st.markdown("""
-**v1.3（2025-02-08）**  
-- 時間スライダー追加  
-- 横スクロール UI 改善  
-- CSV ダウンロード追加  
-""")
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # 入力UI
@@ -80,7 +55,7 @@ if st.button("登録"):
     )
     conn.commit()
     st.success("登録しやした！")
-    st.experimental_rerun()
+    st.rerun()
 
 # -------------------------
 # 一覧表示
