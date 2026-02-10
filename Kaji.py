@@ -96,7 +96,7 @@ for index, row in df.iterrows():
     cols[1].write(row["date"])
     cols[2].write(row["task"])
     cols[3].write(row["person"])
-    cols[4].write(row["time_value"])
+    cols[4].write(row["time"])
     if cols[4].button("削除", key=f"del_{row['id']}"):
         delete_task(row["id"])
         st.rerun()
