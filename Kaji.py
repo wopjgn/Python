@@ -67,9 +67,11 @@ if st.button("登録"):
     st.success("登録しやした！")
     st.rerun()
 
+# -------------------------
+# 一覧表示
+# -------------------------
 
-    
-
+df = pd.read_sql_query("SELECT * FROM kaji ORDER BY id DESC", conn)
 # CSVダウンロード
 csv = df.to_csv(index=False).encode("utf-8")
 st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
