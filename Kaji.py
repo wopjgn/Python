@@ -68,6 +68,13 @@ if st.button("登録"):
     st.rerun()
 
 # -------------------------
+# 一覧表示
+# -------------------------
+st.subheader("実績一覧")
+
+df = pd.read_sql_query("SELECT * FROM kaji ORDER BY id DESC", conn)
+
+# -------------------------
 # スマホ対応テーブル（横スクロール & 改行禁止）
 # -------------------------
 table_html = """<style>
