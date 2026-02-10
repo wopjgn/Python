@@ -130,7 +130,7 @@ if "delete" in params:
     # 再読み込み
     st.rerun()
 
-st.subheader("実績一覧あ")
+st.subheader("実績一覧")
 
 df = pd.read_sql_query("SELECT * FROM kaji", conn)
 
