@@ -98,7 +98,7 @@ for index, row in df.iterrows():
     cols[3].write(row["person"])
     if cols[4].button("削除", key=f"del_{row['id']}"):
         delete_task(row["id"])
-        st.experimental_rerun()
+        st.rerun()
 
 # -------------------------
 # バージョン履歴（expander）
