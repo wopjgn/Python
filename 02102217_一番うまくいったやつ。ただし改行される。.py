@@ -5,12 +5,7 @@ from datetime import datetime
 
 # DB接続
 import os
-
-###データが1日で消えるので以下２行削除
-#DB_PATH = os.path.join(os.getcwd(), "kaji.db")
-#conn = sqlite3.connect(DB_PATH)
-#代わりにこれを代入
-DB_PATH = "kaji.db"
+DB_PATH = os.path.join(os.getcwd(), "kaji.db")
 conn = sqlite3.connect(DB_PATH)
 
 cur = conn.cursor()
@@ -56,7 +51,7 @@ st.title("🏠家事 実績🐖")
 # 入力UI
 # -------------------------
 time_value = st.slider("作業時間を選択", 1, 120, 15)
-person = st.radio("担当者を選択", ["Pi", "Mi"], horizontal=True)
+person = st.radio("担当者を選択", ["Piちゃん", "Miちゃん"], horizontal=True)
 task = st.selectbox("家事の種類", [
     "🍳料理", "🫗皿洗い", "👕洗濯", "🧹掃除", "🛒買い物",
     "🚮ゴミ出し", "🛁風呂掃除", "🚽トイレ掃除", "💧水回り"
