@@ -67,6 +67,126 @@ if st.button("登録"):
     st.success("登録しやした！")
     st.rerun()
 
+# -------------------------
+# 一覧表示
+# -------------------------
+st.subheader("実績一覧")
+
+df = pd.read_sql_query("SELECT * FROM kaji ORDER BY id DESC", conn)
+
+# -------------------------
+# スマホ対応テーブル（横スクロール & 改行禁止）
+# -------------------------
+table_html = """<style>
+.table-wrap { overflow-x: auto; width: 100%; }
+table { border-collapse: collapse; width: 100%; min-width: 750px; }
+th, td { border: 1px solid #ccc; padding: 6px 10px; white-space: nowrap; }
+.del-link {
+    background-color: red;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+</style>
+<div class="table-wrap">
+<table>
+<tr>
+<th>ID</th><th>日付</th><th>家事</th><th>担当</th><th>時間</th><th>削除</th>
+</tr>
+"""
+
+for _, row in df.iterrows():
+    table_html += (
+        f"<tr>"
+        f"<td>{row['id']}</td>"
+        f"<td>{row['date']}</td>"
+        f"<td>{row['task']}</td>"
+        f"<td>{row['person']}</td>"
+        f"<td>{row['time']}</td>"
+        f"<td><a class='del-link' href='?delete_id={row['id']}'>削除</a></td>"
+        f"</tr>"
+    )
+
+table_html += "</table></div>"
+
+st.markdown(table_html, unsafe_allow_html=True)
+
+
+# -------------------------
+# 削除処理
+# -------------------------
+def delete_task(task_id):
+    cur.execute("DELETE FROM kaji WHERE id = ?", (task_id,))
+    conn.commit()
+
+params = st.query_params
+
+# 削除処理
+if "delete" in params:
+    delete_task(params["delete"])
+
+    # URLパラメータを消す
+    st.query_params.clear()
+
+    # 再読み込み
+    st.rerun()
+
+st.subheader("実績一覧")
+
+df = pd.read_sql_query("SELECT * FROM kaji", conn)
+
+# 表示用の連番
+df["no"] = range(1, len(df) + 1)
+
+# -------------------------
+# CSS（横並び）
+# -------------------------
+st.markdown("""
+<style>
+.row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+.row-left {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+}
+.delete-btn {
+    background-color: red;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# -------------------------
+# 行を描画
+# -------------------------
+for _, row in df.iterrows():
+
+    html = f"""
+    <div class="row">
+        <div class="row-left">
+            <div>{row["no"]}</div>
+            <div>{row["date"]}</div>
+            <div>{row["task"]}</div>
+            <div>{row["person"]}</div>
+        </div>
+        <a class="delete-btn" href="/?delete={row['id']}">削除</a>
+    </div>
+    """
+
+    st.markdown(html, unsafe_allow_html=True)
 
     
 
