@@ -67,11 +67,6 @@ if st.button("登録"):
     st.success("登録しやした！")
     st.rerun()
 
-
-# CSVダウンロード
-csv = df.to_csv(index=False).encode("utf-8")
-st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
-
 # -------------------------
 # スマホ対応テーブル（横スクロール & 改行禁止）
 # -------------------------
@@ -185,3 +180,9 @@ for _, row in df.iterrows():
     """
 
     st.markdown(html, unsafe_allow_html=True)
+
+    
+
+# CSVダウンロード
+csv = df.to_csv(index=False).encode("utf-8")
+st.download_button("📥 CSVをダウンロード", csv, "kaji.csv", "text/csv")
