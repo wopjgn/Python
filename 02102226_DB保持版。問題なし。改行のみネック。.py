@@ -92,7 +92,7 @@ def delete_task(task_id):
 
 st.subheader("実績一覧")
 
-df = pd.read_sql_query("SELECT * FROM kaji ORDER BY id DESC", conn)
+df = pd.read_sql_query("SELECT * FROM kaji", conn)
 
 # 削除ボタン付きの表を作る
 for index, row in df.iterrows():
