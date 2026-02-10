@@ -91,7 +91,7 @@ df = pd.read_sql_query("SELECT * FROM kaji", conn)
 
 # 削除ボタン付きの表を作る
 for index, row in df.iterrows():
-    cols = st.columns([1, 2, 2, 2, 2, 1])  # 表示の幅調整
+    cols = st.columns([1, 2, 2, 2, 2, 2])  # 表示の幅調整
     cols[0].write(row["id"])
     cols[1].write(row["date"])
     cols[2].write(row["task"])
